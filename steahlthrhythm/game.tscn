@@ -1,6 +1,43 @@
-[gd_scene load_steps=2 format=3 uid="uid://du6ksje41mbw0"]
+[gd_scene load_steps=7 format=3 uid="uid://du6ksje41mbw0"]
 
-[ext_resource type="Script" path="res://game.gd" id="1_wldbh"]
+[ext_resource type="Script" path="res://rhythm_creator.gd" id="1_yofai"]
+[ext_resource type="Script" path="res://midi_reader.gd" id="2_i7434"]
+[ext_resource type="PackedScene" uid="uid://bdvkdv77fslji" path="res://addons/midi/ADSR.tscn" id="3_txn34"]
+[ext_resource type="AudioStream" uid="uid://cjrv40n230ff5" path="res://song_file/accela 21 - cow gaming.wav" id="4_f7f3i"]
+[ext_resource type="PackedScene" uid="uid://cuyd1qv0pn26e" path="res://addons/midi/MidiPlayer.tscn" id="4_wtory"]
+[ext_resource type="Texture2D" uid="uid://cqjjbehnugkxy" path="res://icon.svg" id="6_u7bcw"]
 
 [node name="Game" type="Node"]
-script = ExtResource("1_wldbh")
+
+[node name="RhythmCreator" type="Node" parent="."]
+script = ExtResource("1_yofai")
+
+[node name="MidiReader" type="Node" parent="RhythmCreator"]
+script = ExtResource("2_i7434")
+
+[node name="ADSR" parent="RhythmCreator/MidiReader" instance=ExtResource("3_txn34")]
+
+[node name="MidiPlayer" parent="RhythmCreator/MidiReader" instance=ExtResource("4_wtory")]
+file = "res://midi_elements/on_every_138.mid"
+
+[node name="AudioReader" type="Node" parent="RhythmCreator"]
+
+[node name="KingEggSong" type="AudioStreamPlayer" parent="RhythmCreator/AudioReader"]
+stream = ExtResource("4_f7f3i")
+volume_db = -15.0
+
+[node name="TestMusic" type="Node2D" parent="."]
+
+[node name="MidiReactor" type="Sprite2D" parent="TestMusic"]
+position = Vector2(428, 287)
+texture = ExtResource("6_u7bcw")
+
+[node name="BeatReactor" type="Sprite2D" parent="TestMusic"]
+position = Vector2(661, 287)
+texture = ExtResource("6_u7bcw")
+
+[connection signal="sendThatPlayed" from="RhythmCreator/MidiReader" to="RhythmCreator" method="_on_midi_reader_send_that_played"]
+[connection signal="finished" from="RhythmCreator/MidiReader/ADSR" to="RhythmCreator/MidiReader" method="_on_adsr_finished"]
+[connection signal="appeared_track_name" from="RhythmCreator/MidiReader/MidiPlayer" to="RhythmCreator/MidiReader" method="_on_midi_player_appeared_track_name"]
+[connection signal="finished" from="RhythmCreator/MidiReader/MidiPlayer" to="RhythmCreator/MidiReader" method="_on_midi_player_finished"]
+[connection signal="midi_event" from="RhythmCreator/MidiReader/MidiPlayer" to="RhythmCreator/MidiReader" method="_on_midi_player_midi_event"]
